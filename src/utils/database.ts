@@ -2,7 +2,7 @@ import { neon } from '@neondatabase/serverless'
 import type { OutageData } from '../types/outage'
 
 // Database connection
-const sql = neon(process.env.VITE_DATABASE_URL || '')
+const sql = neon(process.env.DATABASE_URL || '')
 
 export class OutageService {
   static async getAllOutages(): Promise<OutageData[]> {
