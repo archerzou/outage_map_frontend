@@ -1,9 +1,8 @@
 import { Stack, Title, Button, Card, Text, Badge, Group, Select, TextInput, Checkbox, Skeleton } from '@mantine/core'
-import { IconArrowLeft, IconSearch, IconMapPin, IconAlertCircle, IconChevronRight, IconX, IconFilter, IconUsers, IconClock, IconBolt } from '@tabler/icons-react'
+import { IconArrowLeft, IconSearch, IconMapPin, IconAlertCircle, IconChevronRight, IconX, IconFilter } from '@tabler/icons-react'
 import { useState } from 'react'
 import { powerOutagesData } from '../data/powerOutages'
 import type { Outage } from '../types/outage'
-import { formatTimeRange } from '../utils/dateFormat'
 
 interface SidebarDetailProps {
   eventTypeId: string
@@ -90,14 +89,13 @@ const SidebarDetail = ({ eventTypeId, eventTypeName, onBack }: SidebarDetailProp
               onChange={(value) => setStatusFilter(value || 'all')}
             />
 
-            <Group gap="sm" mt="md">
-              <Button onClick={filterOutages} leftSection={<IconSearch size={16} />}>
-                Find
-              </Button>
-              <Button variant="outline" onClick={handleClearFilters} leftSection={<IconX size={16} />}>
-                Clear Filters
-              </Button>
-            </Group>
+            <Button onClick={filterOutages} leftSection={<IconSearch size={16} />} fullWidth>
+              Find
+            </Button>
+            
+            <Button variant="outline" onClick={handleClearFilters} leftSection={<IconX size={16} />} fullWidth>
+              Clear Filters
+            </Button>
           </Stack>
         </Card>
 
@@ -131,42 +129,17 @@ const SidebarDetail = ({ eventTypeId, eventTypeName, onBack }: SidebarDetailProp
                   >
                     <Stack gap="xs">
                       <Group justify="space-between" align="flex-start">
-                        <Text size="xs" fw={600} lineClamp={1} style={{ flex: 1 }}>
-                          Power Outage - {outage.provider.toUpperCase()}
+                        <Text size="xs" fw={500} lineClamp={1} style={{ flex: 1 }}>
+                          {outage.location_description}
                         </Text>
                         <Badge size="xs" color={getStatusColor(outage.status)}>
                           {outage.status}
                         </Badge>
                       </Group>
                       
-                      <Text size="xs" c="dimmed" lineClamp={2}>
-                        {outage.location_description.length > 50 
-                          ? `${outage.location_description.substring(0, 50)}...` 
-                          : outage.location_description}
+                      <Text size="xs" c="dimmed">
+                        Provider: {outage.provider.toUpperCase()}
                       </Text>
-                      
-                      <Group gap="xs">
-                        <IconUsers size={12} />
-                        <Text size="xs">
-                          {outage.affected_customers !== null 
-                            ? `${outage.affected_customers} customers affected` 
-                            : 'Affected customers: Unknown'}
-                        </Text>
-                      </Group>
-                      
-                      <Group gap="xs">
-                        <IconClock size={12} />
-                        <Text size="xs">
-                          {formatTimeRange(outage.start_time, outage.end_time)}
-                        </Text>
-                      </Group>
-                      
-                      <Group gap="xs">
-                        <IconBolt size={12} />
-                        <Text size="xs">
-                          {outage.schedule_type === 'planned' ? 'Planned' : 'Unplanned'}
-                        </Text>
-                      </Group>
                     </Stack>
                   </Card>
                 ))}
