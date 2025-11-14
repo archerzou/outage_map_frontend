@@ -7,7 +7,7 @@ import SidebarHome from './components/SidebarHome'
 import SidebarDetail from './components/SidebarDetail'
 import { eventTypes } from './data/eventTypes'
 import { powerOutagesData } from './data/powerOutages'
-import { roadClosuresData } from './data/roadClosures'
+import type { Outage } from './types/outage'
 
 function App() {
   const [opened, { toggle }] = useDisclosure()
@@ -26,36 +26,11 @@ function App() {
     return eventType?.name || ''
   }
 
-  const getEventData = () => {
-    switch (selectedEventType) {
-      case 'power-outages':
-        return powerOutagesData.map(outage => ({
-          id: outage.id,
-          title: outage.title,
-          description: outage.description,
-          latitude: outage.latitude,
-          longitude: outage.longitude,
-          severity: outage.severity,
-          status: outage.status,
-          affectedCustomers: outage.affectedCustomers,
-          estimatedRestoration: outage.estimatedRestoration,
-          createdAt: outage.createdAt,
-        }))
-      case 'road-closures':
-        return roadClosuresData.map(closure => ({
-          id: closure.id,
-          title: closure.title,
-          description: closure.description,
-          latitude: closure.latitude,
-          longitude: closure.longitude,
-          severity: closure.severity,
-          status: closure.status,
-          affectedCustomers: 0,
-          createdAt: closure.createdAt,
-        }))
-      default:
-        return []
+  const getEventData = (): Outage[] => {
+    if (selectedEventType === 'power-outages') {
+      return powerOutagesData
     }
+    return []
   }
 
   return (
