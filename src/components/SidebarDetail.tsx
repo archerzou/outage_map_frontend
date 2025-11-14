@@ -90,7 +90,7 @@ const SidebarDetail = ({ eventTypeId, eventTypeName, onBack }: SidebarDetailProp
               onChange={(value) => setStatusFilter(value || 'all')}
             />
 
-            <Group spacing="sm" mt="md">
+            <Group gap="sm" mt="md">
               <Button onClick={filterOutages} leftSection={<IconSearch size={16} />}>
                 Find
               </Button>
@@ -106,13 +106,13 @@ const SidebarDetail = ({ eventTypeId, eventTypeName, onBack }: SidebarDetailProp
             <Text size="sm" fw={600}>Recent Outages</Text>
 
             {isLoading ? (
-              <Stack spacing="md">
+              <Stack gap="md">
                 {Array(3).fill(0).map((_, i) => (
                   <Skeleton key={i} height={120} radius="md" />
                 ))}
               </Stack>
             ) : displayOutages.length === 0 ? (
-              <Stack align="center" spacing="md" py="xl">
+              <Stack align="center" gap="md" py="xl">
                 <IconAlertCircle size={48} color="gray" />
                 <Text size="lg" fw={500}>No outages found</Text>
                 <Text size="sm" c="dimmed" ta="center">
