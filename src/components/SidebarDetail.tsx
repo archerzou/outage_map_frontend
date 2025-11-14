@@ -1,8 +1,8 @@
-import { Stack, Title, Button, Card, Text, Badge, Group, Select, TextInput, Checkbox, Skeleton } from '@mantine/core'
+import { Stack, Title, Button, Card, Text, Badge, Group, Select, TextInput, Checkbox, Skeleton, ActionIcon } from '@mantine/core'
 import { IconArrowLeft, IconSearch, IconMapPin, IconAlertCircle, IconChevronRight, IconX, IconFilter } from '@tabler/icons-react'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+import { useDebouncedValue } from '@mantine/hooks'
 import { powerOutagesData } from '../data/powerOutages'
-import type { Outage } from '../types/outage'
 
 interface SidebarDetailProps {
   eventTypeId: string
@@ -13,10 +13,10 @@ interface SidebarDetailProps {
 const SidebarDetail = ({ eventTypeId, eventTypeName, onBack }: SidebarDetailProps) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [filteredOutages, setFilteredOutages] = useState<Outage[]>([])
-  const [showFiltered, setShowFiltered] = useState(false)
   const [isLoading] = useState(false)
   const [locationSearch, setLocationSearch] = useState('Christchurch, New Zealand')
+
+  const [debouncedSearch] = useDebouncedValue(searchTerm, 300)
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -35,29 +35,19 @@ const SidebarDetail = ({ eventTypeId, eventTypeName, onBack }: SidebarDetailProp
     }
   }
 
-  const applyFilters = (term: string, status: string) => {
-    const filtered = powerOutagesData.filter(outage => {
+  const displayOutages = useMemo(() => {
+    const term = debouncedSearch.toLowerCase().trim()
+    return powerOutagesData.filter(outage => {
       const matchesSearch = term === '' || 
-        outage.location_description.toLowerCase().includes(term.toLowerCase())
+        outage.location_description.toLowerCase().includes(term)
       
-      const matchesStatus = status === 'all' || 
-        outage.status === status
+      const matchesStatus = statusFilter === 'all' || 
+        outage.status === statusFilter
       
       return matchesSearch && matchesStatus
     })
-    
-    setFilteredOutages(filtered)
-    setShowFiltered(true)
-  }
+  }, [debouncedSearch, statusFilter])
 
-  const handleClearFilters = () => {
-    setSearchTerm('')
-    setStatusFilter('all')
-    setFilteredOutages([])
-    setShowFiltered(false)
-  }
-
-  const displayOutages = showFiltered ? filteredOutages : powerOutagesData
   const outagesToShow = displayOutages.slice(0, 8)
 
   const renderPowerOutagesContent = () => {
@@ -72,6 +62,19 @@ const SidebarDetail = ({ eventTypeId, eventTypeName, onBack }: SidebarDetailProp
               leftSection={<IconSearch size={16} />}
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.currentTarget.value)}
+              rightSection={
+                searchTerm ? (
+                  <ActionIcon
+                    size="sm"
+                    variant="subtle"
+                    aria-label="Clear search"
+                    onClick={() => setSearchTerm('')}
+                  >
+                    <IconX size={14} />
+                  </ActionIcon>
+                ) : null
+              }
+              rightSectionPointerEvents="auto"
             />
 
             <Select
@@ -86,21 +89,9 @@ const SidebarDetail = ({ eventTypeId, eventTypeName, onBack }: SidebarDetailProp
                 { value: 'scheduled', label: 'Scheduled' },
               ]}
               value={statusFilter}
-              onChange={(value) => {
-                const nextStatus = value || 'all'
-                setStatusFilter(nextStatus)
-                applyFilters(searchTerm, nextStatus)
-              }}
+              onChange={(value) => setStatusFilter(value || 'all')}
               comboboxProps={{ withinPortal: true, zIndex: 5000 }}
             />
-
-            <Button onClick={() => applyFilters(searchTerm, statusFilter)} leftSection={<IconSearch size={16} />} fullWidth>
-              Find
-            </Button>
-            
-            <Button variant="outline" onClick={handleClearFilters} leftSection={<IconX size={16} />} fullWidth>
-              Clear Filters
-            </Button>
           </Stack>
         </Card>
 
