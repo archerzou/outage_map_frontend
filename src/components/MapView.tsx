@@ -115,10 +115,10 @@ const MapView = ({ outages = [] }: MapViewProps) => {
   }
 
   return (
-    <Box style={{ height: 'calc(100vh - 120px)', width: '100%' }}>
+    <Box style={{ height: '100%', width: '100%' }}>
       <MapContainer
-        center={[-41.2924, 174.7787]} // Wellington, New Zealand
-        zoom={6} // Zoom level to show most of New Zealand
+        center={[-43.5321, 172.6362]} // Christchurch, Canterbury
+        zoom={11} // Regional view for Canterbury
         style={{ height: '100%', width: '100%' }}
         ref={mapRef}
       >
