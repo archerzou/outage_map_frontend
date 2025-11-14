@@ -2,7 +2,8 @@ import { useRef } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, ZoomControl } from 'react-leaflet'
 import { Box } from '@mantine/core'
 import L from 'leaflet'
-import type { OutageData } from '../types/outage'
+import type { Outage } from '../types/outage'
+import { formatTimeRange } from '../utils/dateFormat'
 
 // Fix for default markers in react-leaflet
 delete (L.Icon.Default.prototype as L.Icon.Default & { _getIconUrl?: () => string })._getIconUrl
@@ -13,96 +14,34 @@ L.Icon.Default.mergeOptions({
 })
 
 interface MapViewProps {
-  outages?: OutageData[]
+  outages?: Outage[]
 }
 
 const MapView = ({ outages = [] }: MapViewProps) => {
   const mapRef = useRef<L.Map>(null)
 
-  // Sample outage data for New Zealand
-  const sampleOutages: OutageData[] = [
-    {
-      id: '1',
-      title: 'Power Outage - Auckland CBD',
-      description: 'Electrical grid failure affecting central Auckland businesses',
-      latitude: -36.8485,
-      longitude: 174.7633,
-      severity: 'high',
-      status: 'active',
-      affectedCustomers: 2500,
-      estimatedRestoration: new Date('2024-01-15T18:00:00Z'),
-      createdAt: new Date('2024-01-15T10:30:00Z'),
-    },
-    {
-      id: '2',
-      title: 'Internet Outage - Wellington',
-      description: 'Fiber cable damage affecting Wellington region',
-      latitude: -41.2924,
-      longitude: 174.7787,
-      severity: 'medium',
-      status: 'active',
-      affectedCustomers: 1800,
-      estimatedRestoration: new Date('2024-01-15T16:00:00Z'),
-      createdAt: new Date('2024-01-15T09:15:00Z'),
-    },
-    {
-      id: '3',
-      title: 'Water Supply Issue - Christchurch',
-      description: 'Water treatment plant maintenance affecting supply',
-      latitude: -43.5321,
-      longitude: 172.6362,
-      severity: 'medium',
-      status: 'active',
-      affectedCustomers: 3200,
-      estimatedRestoration: new Date('2024-01-15T20:00:00Z'),
-      createdAt: new Date('2024-01-15T08:00:00Z'),
-    },
-    {
-      id: '4',
-      title: 'Power Outage - Hamilton',
-      description: 'Transformer failure in residential area',
-      latitude: -37.7870,
-      longitude: 175.2793,
-      severity: 'low',
-      status: 'resolved',
-      affectedCustomers: 450,
-      estimatedRestoration: new Date('2024-01-15T14:00:00Z'),
-      createdAt: new Date('2024-01-15T11:30:00Z'),
-    },
-    {
-      id: '5',
-      title: 'Gas Supply Disruption - Dunedin',
-      description: 'Pipeline maintenance affecting gas supply',
-      latitude: -45.8788,
-      longitude: 170.5028,
-      severity: 'low',
-      status: 'active',
-      affectedCustomers: 680,
-      estimatedRestoration: new Date('2024-01-15T17:30:00Z'),
-      createdAt: new Date('2024-01-15T07:45:00Z'),
-    },
-  ]
-
-  const displayOutages = outages.length > 0 ? outages : sampleOutages
-
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'high':
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active':
         return '#ff4757'
-      case 'medium':
-        return '#ffa502'
-      case 'low':
+      case 'restored':
         return '#2ed573'
+      case 'cancelled':
+        return '#747d8c'
+      case 'postponed':
+        return '#ffa502'
+      case 'scheduled':
+        return '#5352ed'
       default:
         return '#747d8c'
     }
   }
 
-  const createCustomIcon = (severity: string) => {
+  const createCustomIcon = (status: string) => {
     return L.divIcon({
       className: 'custom-marker',
       html: `<div style="
-        background-color: ${getSeverityColor(severity)};
+        background-color: ${getStatusColor(status)};
         width: 20px;
         height: 20px;
         border-radius: 50%;
@@ -130,32 +69,42 @@ const MapView = ({ outages = [] }: MapViewProps) => {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {displayOutages.map((outage) => (
+        {outages.map((outage) => (
           <Marker
             key={outage.id}
-            position={[outage.latitude, outage.longitude]}
-            icon={createCustomIcon(outage.severity)}
+            position={[outage.location_geometry.coordinates[1], outage.location_geometry.coordinates[0]]}
+            icon={createCustomIcon(outage.status)}
           >
             <Popup>
-              <div>
-                <h3 style={{ margin: '0 0 8px 0', fontSize: '14px' }}>
-                  {outage.title}
+              <div style={{ cursor: 'pointer' }}>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', fontWeight: 600 }}>
+                  Power Outage - {outage.provider.toUpperCase()}
                 </h3>
                 <p style={{ margin: '4px 0', fontSize: '12px' }}>
-                  {outage.description}
+                  <strong>Location:</strong> {outage.location_description}
                 </p>
                 <p style={{ margin: '4px 0', fontSize: '12px' }}>
-                  <strong>Status:</strong> {outage.status}
+                  <strong>Affected:</strong>{' '}
+                  {outage.affected_customers !== null 
+                    ? `${outage.affected_customers} customers` 
+                    : 'Unknown'}
                 </p>
                 <p style={{ margin: '4px 0', fontSize: '12px' }}>
-                  <strong>Affected:</strong> {outage.affectedCustomers} customers
+                  <strong>Time:</strong> {formatTimeRange(outage.start_time, outage.end_time)}
                 </p>
-                {outage.estimatedRestoration && (
-                  <p style={{ margin: '4px 0', fontSize: '12px' }}>
-                    <strong>Est. Restoration:</strong>{' '}
-                    {outage.estimatedRestoration.toLocaleString()}
-                  </p>
-                )}
+                <p style={{ margin: '4px 0', fontSize: '12px' }}>
+                  <strong>Status:</strong>{' '}
+                  <span style={{ 
+                    color: getStatusColor(outage.status),
+                    fontWeight: 600,
+                    textTransform: 'capitalize'
+                  }}>
+                    {outage.status}
+                  </span>
+                </p>
+                <p style={{ margin: '4px 0', fontSize: '12px' }}>
+                  <strong>Type:</strong> {outage.schedule_type === 'planned' ? 'Planned' : 'Unplanned'}
+                </p>
               </div>
             </Popup>
           </Marker>
