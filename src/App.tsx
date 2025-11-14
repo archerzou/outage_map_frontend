@@ -68,11 +68,11 @@ function App() {
       }}
       padding={0}
     >
-      <AppShell.Header style={{ borderBottom: '1px solid #e0e0e0' }}>
+      <AppShell.Header style={{ borderBottom: '1px solid #e0e0e0', zIndex: 1000 }}>
         <Header opened={opened} toggle={toggle} />
       </AppShell.Header>
 
-      <AppShell.Navbar p="md" style={{ overflowY: 'auto' }}>
+      <AppShell.Navbar p="md" style={{ overflowY: 'auto', zIndex: 900 }}>
         {selectedEventType ? (
           <SidebarDetail
             eventTypeId={selectedEventType}
@@ -84,7 +84,7 @@ function App() {
         )}
       </AppShell.Navbar>
 
-      <AppShell.Main style={{ padding: 0, position: 'relative', height: 'calc(100vh - 60px)' }}>
+      <AppShell.Main style={{ padding: 0, position: 'relative', height: 'calc(100dvh - 60px)', zIndex: 0 }}>
         <MapView outages={getEventData()} />
       </AppShell.Main>
     </AppShell>
