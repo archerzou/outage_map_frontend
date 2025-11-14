@@ -84,7 +84,7 @@ function App() {
         )}
       </AppShell.Navbar>
 
-      <AppShell.Main style={{ padding: 0, position: 'relative', height: 'calc(100vh - 60px)' }}>
+      <AppShell.Main style={{ padding: 0, position: 'relative', height: 'calc(100dvh - 60px)' }}>
         <MapView outages={getEventData()} />
       </AppShell.Main>
     </AppShell>
