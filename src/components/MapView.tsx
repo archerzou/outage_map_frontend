@@ -122,6 +122,7 @@ const MapView = ({ outages = [] }: MapViewProps) => {
         style={{ height: '100%', width: '100%' }}
         ref={mapRef}
         zoomControl={false}
+        attributionControl={false}
       >
         <ZoomControl position="topright" />
         <TileLayer
