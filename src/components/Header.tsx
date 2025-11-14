@@ -14,7 +14,7 @@ const Header = ({ opened, toggle }: HeaderProps) => {
         <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
         <img src={mapLogo} alt="Event Map Logo" style={{ width: 32, height: 32 }} />
         <Text size="lg" fw={600} c="#00bcd4">
-          eventmap
+          Event Map
         </Text>
       </Group>
 
@@ -28,7 +28,7 @@ const Header = ({ opened, toggle }: HeaderProps) => {
         <Anchor href="#" underline="never" c="dimmed" fw={500}>
           About
         </Anchor>
-        <Group gap="xs">
+        <Group gap={4}>
           <IconHeart size={16} color="#666" />
           <Anchor href="#" underline="never" c="dimmed" fw={500}>
             Tracked
