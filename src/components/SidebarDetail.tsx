@@ -35,13 +35,13 @@ const SidebarDetail = ({ eventTypeId, eventTypeName, onBack }: SidebarDetailProp
     }
   }
 
-  const filterOutages = () => {
+  const applyFilters = (term: string, status: string) => {
     const filtered = powerOutagesData.filter(outage => {
-      const matchesSearch = searchTerm === '' || 
-        outage.location_description.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesSearch = term === '' || 
+        outage.location_description.toLowerCase().includes(term.toLowerCase())
       
-      const matchesStatus = statusFilter === 'all' || 
-        outage.status === statusFilter
+      const matchesStatus = status === 'all' || 
+        outage.status === status
       
       return matchesSearch && matchesStatus
     })
@@ -86,10 +86,15 @@ const SidebarDetail = ({ eventTypeId, eventTypeName, onBack }: SidebarDetailProp
                 { value: 'scheduled', label: 'Scheduled' },
               ]}
               value={statusFilter}
-              onChange={(value) => setStatusFilter(value || 'all')}
+              onChange={(value) => {
+                const nextStatus = value || 'all'
+                setStatusFilter(nextStatus)
+                applyFilters(searchTerm, nextStatus)
+              }}
+              comboboxProps={{ withinPortal: true, zIndex: 5000 }}
             />
 
-            <Button onClick={filterOutages} leftSection={<IconSearch size={16} />} fullWidth>
+            <Button onClick={() => applyFilters(searchTerm, statusFilter)} leftSection={<IconSearch size={16} />} fullWidth>
               Find
             </Button>
             
