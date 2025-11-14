@@ -1,5 +1,5 @@
 import { Stack, Title, Button, Card, Text, Badge, Group, Select, TextInput, Checkbox, Skeleton } from '@mantine/core'
-import { IconArrowLeft, IconSearch, IconMapPin, IconAlertCircle, IconChevronRight, IconX, IconFilter, IconUsers, IconClock, IconZap } from '@tabler/icons-react'
+import { IconArrowLeft, IconSearch, IconMapPin, IconAlertCircle, IconChevronRight, IconX, IconFilter, IconUsers, IconClock, IconBolt } from '@tabler/icons-react'
 import { useState } from 'react'
 import { powerOutagesData } from '../data/powerOutages'
 import type { Outage } from '../types/outage'
@@ -162,7 +162,7 @@ const SidebarDetail = ({ eventTypeId, eventTypeName, onBack }: SidebarDetailProp
                       </Group>
                       
                       <Group gap="xs">
-                        <IconZap size={12} />
+                        <IconBolt size={12} />
                         <Text size="xs">
                           {outage.schedule_type === 'planned' ? 'Planned' : 'Unplanned'}
                         </Text>
