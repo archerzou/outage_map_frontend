@@ -12,6 +12,7 @@ import type { Outage } from './types/outage'
 function App() {
   const [opened, { toggle }] = useDisclosure()
   const [selectedEventType, setSelectedEventType] = useState<string | null>(null)
+  const [selectedOutageId, setSelectedOutageId] = useState<string | null>(null)
 
   const handleSelectEventType = (eventTypeId: string) => {
     setSelectedEventType(eventTypeId)
@@ -19,6 +20,10 @@ function App() {
 
   const handleBack = () => {
     setSelectedEventType(null)
+  }
+
+  const handleOutageSelect = (outageId: string) => {
+    setSelectedOutageId(outageId)
   }
 
   const getEventTypeName = (eventTypeId: string) => {
@@ -53,6 +58,7 @@ function App() {
             eventTypeId={selectedEventType}
             eventTypeName={getEventTypeName(selectedEventType)}
             onBack={handleBack}
+            onOutageSelect={handleOutageSelect}
           />
         ) : (
           <SidebarHome onSelectEventType={handleSelectEventType} />
@@ -60,7 +66,7 @@ function App() {
       </AppShell.Navbar>
 
       <AppShell.Main style={{ padding: 0, position: 'relative', height: 'calc(100dvh - 60px)', zIndex: 0 }}>
-        <MapView outages={getEventData()} />
+        <MapView outages={getEventData()} selectedOutageId={selectedOutageId} />
       </AppShell.Main>
     </AppShell>
   )

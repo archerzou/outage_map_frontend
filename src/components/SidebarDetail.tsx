@@ -8,9 +8,10 @@ interface SidebarDetailProps {
   eventTypeId: string
   eventTypeName: string
   onBack: () => void
+  onOutageSelect?: (outageId: string) => void
 }
 
-const SidebarDetail = ({ eventTypeId, eventTypeName, onBack }: SidebarDetailProps) => {
+const SidebarDetail = ({ eventTypeId, eventTypeName, onBack, onOutageSelect }: SidebarDetailProps) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [isLoading] = useState(false)
@@ -122,6 +123,7 @@ const SidebarDetail = ({ eventTypeId, eventTypeName, onBack }: SidebarDetailProp
                     radius="sm" 
                     p="sm"
                     style={{ cursor: 'pointer' }}
+                    onClick={() => onOutageSelect?.(outage.id)}
                   >
                     <Stack gap="xs">
                       <Group justify="space-between" align="flex-start">
