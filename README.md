@@ -2,6 +2,8 @@
 
 A React-based interactive map application for tracking and visualizing service outages across New Zealand.
 
+**[🔗 Live Demo](https://event-map-frontend.vercel.app/)**
+
 ## Screenshots
 
 ### Home Page
