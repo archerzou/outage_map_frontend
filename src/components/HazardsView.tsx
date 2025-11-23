@@ -77,7 +77,7 @@ const HazardsView = ({ hazards = [], selectedHazardId = null, eventTitle, onHaza
         {eventTitle || 'Weather Hazard'}
       </h3>
       <p style={{ margin: '4px 0', fontSize: '12px' }}>
-        <strong>Type:</strong> {hazard.hazard_type}
+        <strong>Hazard:</strong> {hazard.hazard_type}
       </p>
       <p style={{ margin: '4px 0', fontSize: '12px' }}>
         <strong>Region:</strong> {hazard.region}
@@ -90,7 +90,7 @@ const HazardsView = ({ hazards = [], selectedHazardId = null, eventTitle, onHaza
       {hazard.impacts && hazard.impacts.length > 0 && (
         <div style={{ marginTop: '8px' }}>
           <p style={{ margin: '4px 0', fontSize: '12px', fontWeight: 600 }}>
-            Impacts ({hazard.impacts.length}):
+            Impacts:
           </p>
           <ul style={{ margin: '4px 0', paddingLeft: '16px', fontSize: '11px' }}>
             {hazard.impacts.slice(0, 3).map((impact, idx) => (
