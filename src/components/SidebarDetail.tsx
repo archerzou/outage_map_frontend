@@ -2,7 +2,10 @@ import { Stack, Title, Button, Card, Text, Badge, Group, Select, TextInput, Chec
 import { IconArrowLeft, IconSearch, IconMapPin, IconAlertCircle, IconChevronRight, IconX, IconFilter } from '@tabler/icons-react'
 import { useState, useMemo } from 'react'
 import { useDebouncedValue } from '@mantine/hooks'
-import { powerOutagesData } from '../data/powerOutages'
+import powerOutagesDataJson from '../data/powerOutages.json'
+import type { Outage } from '../types/outage'
+
+const powerOutagesData = powerOutagesDataJson as Outage[]
 
 interface SidebarDetailProps {
   eventTypeId: string

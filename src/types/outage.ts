@@ -1,6 +1,6 @@
 export interface LocationGeometry {
-  type: string
-  coordinates: [number, number] // [longitude, latitude]
+  type: 'Point' | 'Polygon'
+  coordinates: [number, number] | [number, number][][] // Point: [lng, lat] | Polygon: array of rings
 }
 
 export interface RescheduleHistory {

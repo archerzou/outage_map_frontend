@@ -6,7 +6,7 @@ import Header from './components/Header'
 import SidebarHome from './components/SidebarHome'
 import SidebarDetail from './components/SidebarDetail'
 import { eventTypes } from './data/eventTypes'
-import { powerOutagesData } from './data/powerOutages'
+import powerOutagesData from './data/powerOutages.json'
 import type { Outage } from './types/outage'
 
 function App() {
@@ -33,7 +33,7 @@ function App() {
 
   const getEventData = (): Outage[] => {
     if (selectedEventType === 'power-outages') {
-      return powerOutagesData
+      return powerOutagesData as Outage[]
     }
     return []
   }
