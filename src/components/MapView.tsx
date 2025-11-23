@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, ZoomControl } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, ZoomControl, Polygon } from 'react-leaflet'
 import { Box } from '@mantine/core'
 import L from 'leaflet'
 import type { Outage } from '../types/outage'
@@ -58,13 +58,59 @@ const MapView = ({ outages = [], selectedOutageId = null }: MapViewProps) => {
     })
   }
 
+  const getOutageCenter = (outage: Outage): [number, number] => {
+    if (outage.location_geometry.type === 'Point') {
+      const coords = outage.location_geometry.coordinates as [number, number]
+      return [coords[1], coords[0]]
+    } else {
+      const polygonCoords = outage.location_geometry.coordinates as [number, number][][]
+      const ring = polygonCoords[0]
+      const lats = ring.map(coord => coord[1])
+      const lngs = ring.map(coord => coord[0])
+      const centerLat = (Math.min(...lats) + Math.max(...lats)) / 2
+      const centerLng = (Math.min(...lngs) + Math.max(...lngs)) / 2
+      return [centerLat, centerLng]
+    }
+  }
+
+  const renderPopupContent = (outage: Outage) => (
+    <div style={{ cursor: 'pointer' }}>
+      <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', fontWeight: 600 }}>
+        Power Outage - {outage.provider.toUpperCase()}
+      </h3>
+      <p style={{ margin: '4px 0', fontSize: '12px' }}>
+        <strong>Location:</strong> {outage.location_description}
+      </p>
+      <p style={{ margin: '4px 0', fontSize: '12px' }}>
+        <strong>Affected:</strong>{' '}
+        {outage.affected_customers !== null 
+          ? `${outage.affected_customers} customers` 
+          : 'Unknown'}
+      </p>
+      <p style={{ margin: '4px 0', fontSize: '12px' }}>
+        <strong>Time:</strong> {formatTimeRange(outage.start_time, outage.end_time)}
+      </p>
+      <p style={{ margin: '4px 0', fontSize: '12px' }}>
+        <strong>Status:</strong>{' '}
+        <span style={{ 
+          fontWeight: 600,
+          textTransform: 'capitalize'
+        }}>
+          {outage.status}
+        </span>
+      </p>
+      <p style={{ margin: '4px 0', fontSize: '12px' }}>
+        <strong>Type:</strong> {outage.schedule_type === 'planned' ? 'Planned' : 'Unplanned'}
+      </p>
+    </div>
+  )
+
   useEffect(() => {
     if (mapRef.current && selectedOutageId) {
       const selectedOutage = outages.find(o => o.id === selectedOutageId)
       if (selectedOutage) {
-        const lat = selectedOutage.location_geometry.coordinates[1]
-        const lng = selectedOutage.location_geometry.coordinates[0]
-        mapRef.current.setView([lat, lng], 13, { animate: true })
+        const center = getOutageCenter(selectedOutage)
+        mapRef.current.setView(center, 13, { animate: true })
       }
     }
   }, [selectedOutageId, outages])
@@ -87,45 +133,43 @@ const MapView = ({ outages = [], selectedOutageId = null }: MapViewProps) => {
 
         {outages.map((outage) => {
           const isSelected = outage.id === selectedOutageId
-          return (
-            <Marker
-              key={outage.id}
-              position={[outage.location_geometry.coordinates[1], outage.location_geometry.coordinates[0]]}
-              icon={getMarkerIcon(outage.category, isSelected)}
-            >
-              <Popup>
-                <div style={{ cursor: 'pointer' }}>
-                  <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', fontWeight: 600 }}>
-                    Power Outage - {outage.provider.toUpperCase()}
-                  </h3>
-                  <p style={{ margin: '4px 0', fontSize: '12px' }}>
-                    <strong>Location:</strong> {outage.location_description}
-                  </p>
-                  <p style={{ margin: '4px 0', fontSize: '12px' }}>
-                    <strong>Affected:</strong>{' '}
-                    {outage.affected_customers !== null 
-                      ? `${outage.affected_customers} customers` 
-                      : 'Unknown'}
-                  </p>
-                  <p style={{ margin: '4px 0', fontSize: '12px' }}>
-                    <strong>Time:</strong> {formatTimeRange(outage.start_time, outage.end_time)}
-                  </p>
-                  <p style={{ margin: '4px 0', fontSize: '12px' }}>
-                    <strong>Status:</strong>{' '}
-                    <span style={{ 
-                      fontWeight: 600,
-                      textTransform: 'capitalize'
-                    }}>
-                      {outage.status}
-                    </span>
-                  </p>
-                  <p style={{ margin: '4px 0', fontSize: '12px' }}>
-                    <strong>Type:</strong> {outage.schedule_type === 'planned' ? 'Planned' : 'Unplanned'}
-                  </p>
-                </div>
-              </Popup>
-            </Marker>
-          )
+          
+          if (outage.location_geometry.type === 'Point') {
+            const coords = outage.location_geometry.coordinates as [number, number]
+            return (
+              <Marker
+                key={outage.id}
+                position={[coords[1], coords[0]]}
+                icon={getMarkerIcon(outage.category, isSelected)}
+              >
+                <Popup>
+                  {renderPopupContent(outage)}
+                </Popup>
+              </Marker>
+            )
+          } else if (outage.location_geometry.type === 'Polygon') {
+            const polygonCoords = outage.location_geometry.coordinates as [number, number][][]
+            const positions = polygonCoords[0].map(coord => [coord[1], coord[0]] as [number, number])
+            
+            return (
+              <Polygon
+                key={outage.id}
+                positions={positions}
+                pathOptions={{
+                  color: isSelected ? '#00bcd4' : '#ff4757',
+                  fillColor: isSelected ? '#00bcd4' : '#ff4757',
+                  fillOpacity: 0.3,
+                  weight: 2,
+                }}
+              >
+                <Popup>
+                  {renderPopupContent(outage)}
+                </Popup>
+              </Polygon>
+            )
+          }
+          
+          return null
         })}
       </MapContainer>
     </Box>
