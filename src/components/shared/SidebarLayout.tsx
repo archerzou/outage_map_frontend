@@ -1,6 +1,6 @@
 import { Stack, Title, Button } from '@mantine/core'
 import { IconArrowLeft } from '@tabler/icons-react'
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 
 interface SidebarLayoutProps {
   eventTypeName: string
