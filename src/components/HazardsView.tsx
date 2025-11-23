@@ -2,7 +2,11 @@ import { useRef, useEffect } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, ZoomControl } from 'react-leaflet'
 import { Box } from '@mantine/core'
 import L from 'leaflet'
+import MarkerClusterGroup from 'react-leaflet-markercluster'
 import type { Hazard } from '../types/weather'
+import 'leaflet/dist/leaflet.css'
+import 'leaflet.markercluster/dist/MarkerCluster.css'
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 
 delete (L.Icon.Default.prototype as L.Icon.Default & { _getIconUrl?: () => string })._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -20,6 +24,30 @@ interface HazardsViewProps {
 
 const HazardsView = ({ hazards = [], selectedHazardId = null, eventTitle, onHazardSelect }: HazardsViewProps) => {
   const mapRef = useRef<L.Map>(null)
+
+  // Custom cluster icon creation function
+  const createClusterCustomIcon = (cluster: L.MarkerCluster) => {
+    const count = cluster.getChildCount()
+    
+    return L.divIcon({
+      html: `<div style="
+        background-color: #00bcd4;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 2px solid white;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: bold;
+        color: white;
+      ">${count}</div>`,
+      className: 'custom-cluster-icon',
+      iconSize: L.point(40, 40, true),
+    })
+  }
 
   const getMarkerIcon = (isSelected: boolean) => {
     const backgroundColor = isSelected ? '#00bcd4' : 'white'
@@ -110,24 +138,32 @@ const HazardsView = ({ hazards = [], selectedHazardId = null, eventTitle, onHaza
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {validHazards.map((hazard) => {
-          const isSelected = hazard.id === selectedHazardId
-          
-          return (
-            <Marker
-              key={hazard.id}
-              position={[hazard.latitude!, hazard.longitude!]}
-              icon={getMarkerIcon(isSelected)}
-              eventHandlers={{
-                click: () => onHazardSelect?.(hazard.id),
-              }}
-            >
-              <Popup>
-                {renderPopupContent(hazard)}
-              </Popup>
-            </Marker>
-          )
-        })}
+        <MarkerClusterGroup
+          iconCreateFunction={createClusterCustomIcon}
+          maxClusterRadius={80}
+          spiderfyOnMaxZoom={true}
+          showCoverageOnHover={false}
+          zoomToBoundsOnClick={true}
+        >
+          {validHazards.map((hazard) => {
+            const isSelected = hazard.id === selectedHazardId
+            
+            return (
+              <Marker
+                key={hazard.id}
+                position={[hazard.latitude!, hazard.longitude!]}
+                icon={getMarkerIcon(isSelected)}
+                eventHandlers={{
+                  click: () => onHazardSelect?.(hazard.id),
+                }}
+              >
+                <Popup>
+                  {renderPopupContent(hazard)}
+                </Popup>
+              </Marker>
+            )
+          })}
+        </MarkerClusterGroup>
       </MapContainer>
     </Box>
   )
