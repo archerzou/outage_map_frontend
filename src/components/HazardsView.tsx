@@ -15,9 +15,10 @@ interface HazardsViewProps {
   hazards?: Hazard[]
   selectedHazardId?: number | null
   eventTitle?: string
+  onHazardSelect?: (hazardId: number) => void
 }
 
-const HazardsView = ({ hazards = [], selectedHazardId = null, eventTitle }: HazardsViewProps) => {
+const HazardsView = ({ hazards = [], selectedHazardId = null, eventTitle, onHazardSelect }: HazardsViewProps) => {
   const mapRef = useRef<L.Map>(null)
 
   const getMarkerIcon = (isSelected: boolean) => {
@@ -117,6 +118,9 @@ const HazardsView = ({ hazards = [], selectedHazardId = null, eventTitle }: Haza
               key={hazard.id}
               position={[hazard.latitude!, hazard.longitude!]}
               icon={getMarkerIcon(isSelected)}
+              eventHandlers={{
+                click: () => onHazardSelect?.(hazard.id),
+              }}
             >
               <Popup>
                 {renderPopupContent(hazard)}

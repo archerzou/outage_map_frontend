@@ -13,9 +13,10 @@ interface SidebarWeatherProps {
   onBack: () => void
   onEventSelect?: (eventId: number) => void
   onShowAllHazards?: () => void
+  selectedEventId?: number | null
 }
 
-const SidebarWeather = ({ eventTypeName, onBack, onEventSelect, onShowAllHazards }: SidebarWeatherProps) => {
+const SidebarWeather = ({ eventTypeName, onBack, onEventSelect, onShowAllHazards, selectedEventId }: SidebarWeatherProps) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [hazardTypeFilter, setHazardTypeFilter] = useState<string>('all')
   const [isLoading] = useState(false)
@@ -110,6 +111,7 @@ const SidebarWeather = ({ eventTypeName, onBack, onEventSelect, onShowAllHazards
             <>
               {eventsToShow.map((event) => {
                 const hazardCount = event.hazards.filter(h => h.latitude !== null && h.longitude !== null).length
+                const isSelected = event.id === selectedEventId
                 
                 return (
                   <Card 
@@ -117,7 +119,11 @@ const SidebarWeather = ({ eventTypeName, onBack, onEventSelect, onShowAllHazards
                     withBorder 
                     radius="sm" 
                     p="sm"
-                    style={{ cursor: 'pointer' }}
+                    style={{ 
+                      cursor: 'pointer',
+                      borderColor: isSelected ? '#00bcd4' : undefined,
+                      borderWidth: isSelected ? '2px' : undefined,
+                    }}
                     onClick={() => onEventSelect?.(event.id)}
                   >
                     <Stack gap="xs">

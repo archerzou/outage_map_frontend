@@ -12,9 +12,10 @@ interface SidebarOutagesProps {
   eventTypeName: string
   onBack: () => void
   onOutageSelect?: (outageId: string) => void
+  selectedOutageId?: string | null
 }
 
-const SidebarOutages = ({ eventTypeName, onBack, onOutageSelect }: SidebarOutagesProps) => {
+const SidebarOutages = ({ eventTypeName, onBack, onOutageSelect, selectedOutageId }: SidebarOutagesProps) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [isLoading] = useState(false)
@@ -117,15 +118,22 @@ const SidebarOutages = ({ eventTypeName, onBack, onOutageSelect }: SidebarOutage
             </Stack>
           ) : (
             <>
-              {outagesToShow.map((outage) => (
-                <Card 
-                  key={outage.id} 
-                  withBorder 
-                  radius="sm" 
-                  p="sm"
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => onOutageSelect?.(outage.id)}
-                >
+              {outagesToShow.map((outage) => {
+                const isSelected = outage.id === selectedOutageId
+                
+                return (
+                  <Card 
+                    key={outage.id} 
+                    withBorder 
+                    radius="sm" 
+                    p="sm"
+                    style={{ 
+                      cursor: 'pointer',
+                      borderColor: isSelected ? '#00bcd4' : undefined,
+                      borderWidth: isSelected ? '2px' : undefined,
+                    }}
+                    onClick={() => onOutageSelect?.(outage.id)}
+                  >
                   <Stack gap="xs">
                     <Group justify="space-between" align="flex-start">
                       <Text size="xs" fw={500} lineClamp={1} style={{ flex: 1 }}>
@@ -141,7 +149,8 @@ const SidebarOutages = ({ eventTypeName, onBack, onOutageSelect }: SidebarOutage
                     </Text>
                   </Stack>
                 </Card>
-              ))}
+                )
+              })}
               
               <Button 
                 variant="outline" 

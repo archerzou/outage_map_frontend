@@ -19,12 +19,14 @@ function App() {
   const [selectedEventType, setSelectedEventType] = useState<string | null>(null)
   const [selectedOutageId, setSelectedOutageId] = useState<string | null>(null)
   const [selectedWeatherEventId, setSelectedWeatherEventId] = useState<number | null>(null)
+  const [selectedHazardId, setSelectedHazardId] = useState<number | null>(null)
   const [showAllWeatherHazards, setShowAllWeatherHazards] = useState<boolean>(true)
 
   const handleSelectEventType = (eventTypeId: string) => {
     setSelectedEventType(eventTypeId)
     setSelectedOutageId(null)
     setSelectedWeatherEventId(null)
+    setSelectedHazardId(null)
     setShowAllWeatherHazards(true)
   }
 
@@ -32,6 +34,7 @@ function App() {
     setSelectedEventType(null)
     setSelectedOutageId(null)
     setSelectedWeatherEventId(null)
+    setSelectedHazardId(null)
     setShowAllWeatherHazards(true)
   }
 
@@ -41,11 +44,13 @@ function App() {
 
   const handleWeatherEventSelect = (eventId: number) => {
     setSelectedWeatherEventId(eventId)
+    setSelectedHazardId(null)
     setShowAllWeatherHazards(false)
   }
 
   const handleShowAllWeatherHazards = () => {
     setSelectedWeatherEventId(null)
+    setSelectedHazardId(null)
     setShowAllWeatherHazards(true)
   }
 
@@ -101,6 +106,7 @@ function App() {
             eventTypeName={getEventTypeName(selectedEventType)}
             onBack={handleBack}
             onOutageSelect={handleOutageSelect}
+            selectedOutageId={selectedOutageId}
           />
         )
       case 'road-closures':
@@ -117,6 +123,7 @@ function App() {
             onBack={handleBack}
             onEventSelect={handleWeatherEventSelect}
             onShowAllHazards={handleShowAllWeatherHazards}
+            selectedEventId={selectedWeatherEventId}
           />
         )
       default:
@@ -129,8 +136,9 @@ function App() {
       return (
         <HazardsView 
           hazards={getWeatherHazardsData()} 
-          selectedHazardId={null}
+          selectedHazardId={selectedHazardId}
           eventTitle={getSelectedEventTitle()}
+          onHazardSelect={setSelectedHazardId}
         />
       )
     }
