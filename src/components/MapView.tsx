@@ -2,10 +2,14 @@ import { useRef, useEffect } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, ZoomControl, Polygon } from 'react-leaflet'
 import { Box } from '@mantine/core'
 import L from 'leaflet'
+import 'leaflet.markercluster'
+import MarkerClusterGroup from 'react-leaflet-markercluster'
 import type { Outage } from '../types/outage'
 import { formatTimeRange } from '../utils/dateFormat'
+import 'leaflet/dist/leaflet.css'
+import 'leaflet.markercluster/dist/MarkerCluster.css'
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 
-// Fix for default markers in react-leaflet
 delete (L.Icon.Default.prototype as L.Icon.Default & { _getIconUrl?: () => string })._getIconUrl
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -20,6 +24,29 @@ interface MapViewProps {
 
 const MapView = ({ outages = [], selectedOutageId = null }: MapViewProps) => {
   const mapRef = useRef<L.Map>(null)
+
+  const createClusterCustomIcon = (cluster: L.MarkerCluster) => {
+    const count = cluster.getChildCount()
+    
+    return L.divIcon({
+      html: `<div style="
+        background-color: #00bcd4;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 2px solid white;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: bold;
+        color: white;
+      ">${count}</div>`,
+      className: 'custom-cluster-icon',
+      iconSize: L.point(40, 40, true),
+    })
+  }
 
   const getCategoryIcon = (category: string) => {
     const categoryLower = category.toLowerCase()
@@ -131,23 +158,37 @@ const MapView = ({ outages = [], selectedOutageId = null }: MapViewProps) => {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {outages.map((outage) => {
-          const isSelected = outage.id === selectedOutageId
-          
-          if (outage.location_geometry.type === 'Point') {
-            const coords = outage.location_geometry.coordinates as [number, number]
-            return (
-              <Marker
-                key={outage.id}
-                position={[coords[1], coords[0]]}
-                icon={getMarkerIcon(outage.category, isSelected)}
-              >
-                <Popup>
-                  {renderPopupContent(outage)}
-                </Popup>
-              </Marker>
-            )
-          } else if (outage.location_geometry.type === 'Polygon') {
+        <MarkerClusterGroup
+          iconCreateFunction={createClusterCustomIcon}
+          maxClusterRadius={80}
+          spiderfyOnMaxZoom={true}
+          showCoverageOnHover={false}
+          zoomToBoundsOnClick={true}
+        >
+          {outages
+            .filter(outage => outage.location_geometry.type === 'Point')
+            .map((outage) => {
+              const isSelected = outage.id === selectedOutageId
+              const coords = outage.location_geometry.coordinates as [number, number]
+              
+              return (
+                <Marker
+                  key={outage.id}
+                  position={[coords[1], coords[0]]}
+                  icon={getMarkerIcon(outage.category, isSelected)}
+                >
+                  <Popup>
+                    {renderPopupContent(outage)}
+                  </Popup>
+                </Marker>
+              )
+            })}
+        </MarkerClusterGroup>
+
+        {outages
+          .filter(outage => outage.location_geometry.type === 'Polygon')
+          .map((outage) => {
+            const isSelected = outage.id === selectedOutageId
             const polygonCoords = outage.location_geometry.coordinates as [number, number][][]
             const positions = polygonCoords[0].map(coord => [coord[1], coord[0]] as [number, number])
             
@@ -167,10 +208,7 @@ const MapView = ({ outages = [], selectedOutageId = null }: MapViewProps) => {
                 </Popup>
               </Polygon>
             )
-          }
-          
-          return null
-        })}
+          })}
       </MapContainer>
     </Box>
   )
