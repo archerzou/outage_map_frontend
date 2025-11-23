@@ -1,4 +1,4 @@
-import { IconBolt, IconRoad, IconSchool, IconDroplet } from '@tabler/icons-react'
+import { IconBolt, IconRoad, IconSchool, IconDroplet, IconCloudStorm } from '@tabler/icons-react'
 
 export interface EventType {
   id: string
@@ -31,5 +31,11 @@ export const eventTypes: EventType[] = [
     name: 'boil water notices',
     icon: IconDroplet,
     color: '#00bcd4',
+  },
+  {
+    id: 'historic-weather-hazards',
+    name: 'Historic Weather Hazards',
+    icon: IconCloudStorm,
+    color: '#ff6b6b',
   },
 ]
