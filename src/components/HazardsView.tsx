@@ -2,6 +2,7 @@ import { useRef, useEffect } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, ZoomControl } from 'react-leaflet'
 import { Box } from '@mantine/core'
 import L from 'leaflet'
+import 'leaflet.markercluster'
 import MarkerClusterGroup from 'react-leaflet-markercluster'
 import type { Hazard } from '../types/weather'
 import 'leaflet/dist/leaflet.css'
@@ -25,7 +26,6 @@ interface HazardsViewProps {
 const HazardsView = ({ hazards = [], selectedHazardId = null, eventTitle, onHazardSelect }: HazardsViewProps) => {
   const mapRef = useRef<L.Map>(null)
 
-  // Custom cluster icon creation function
   const createClusterCustomIcon = (cluster: L.MarkerCluster) => {
     const count = cluster.getChildCount()
     
