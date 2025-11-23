@@ -12,6 +12,9 @@ A React-based interactive map application for tracking and visualizing service o
 ### Power Outage Page
 <img src="/screenshots/outage.png" alt="power outage" />
 
+### Polygon
+<img src="/screenshots/polygon.png" alt="power outage area" />
+
 ## Features
 
 - 🗺️ Interactive map focused on New Zealand

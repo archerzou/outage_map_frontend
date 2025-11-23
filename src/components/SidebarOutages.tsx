@@ -14,7 +14,7 @@ interface SidebarDetailProps {
   onOutageSelect?: (outageId: string) => void
 }
 
-const SidebarDetail = ({ eventTypeId, eventTypeName, onBack, onOutageSelect }: SidebarDetailProps) => {
+const SidebarOutages = ({ eventTypeId, eventTypeName, onBack, onOutageSelect }: SidebarDetailProps) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [isLoading] = useState(false)
@@ -243,4 +243,4 @@ const SidebarDetail = ({ eventTypeId, eventTypeName, onBack, onOutageSelect }: S
   )
 }
 
-export default SidebarDetail
+export default SidebarOutages

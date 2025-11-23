@@ -3,8 +3,8 @@ import { useDisclosure } from '@mantine/hooks'
 import { useState } from 'react'
 import MapView from './components/MapView'
 import Header from './components/Header'
-import SidebarHome from './components/SidebarHome'
-import SidebarDetail from './components/SidebarDetail'
+import Sidebar from './components/Sidebar.tsx'
+import SidebarOutages from './components/SidebarOutages.tsx'
 import { eventTypes } from './data/eventTypes'
 import powerOutagesData from './data/powerOutages.json'
 import type { Outage } from './types/outage'
@@ -54,14 +54,14 @@ function App() {
 
       <AppShell.Navbar p="md" style={{ overflowY: 'auto', zIndex: 900 }}>
         {selectedEventType ? (
-          <SidebarDetail
+          <SidebarOutages
             eventTypeId={selectedEventType}
             eventTypeName={getEventTypeName(selectedEventType)}
             onBack={handleBack}
             onOutageSelect={handleOutageSelect}
           />
         ) : (
-          <SidebarHome onSelectEventType={handleSelectEventType} />
+          <Sidebar onSelectEventType={handleSelectEventType} />
         )}
       </AppShell.Navbar>
 
