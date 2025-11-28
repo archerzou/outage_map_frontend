@@ -23,7 +23,7 @@ interface HazardsViewProps {
   onHazardSelect?: (hazardId: number) => void
 }
 
-const HazardsView = ({ hazards = [], selectedHazardId = null, eventTitle, onHazardSelect }: HazardsViewProps) => {
+const HazardsView = ({ hazards = [], selectedHazardId = null, eventTitle }: HazardsViewProps) => {
   const mapRef = useRef<L.Map>(null)
 
   const createClusterCustomIcon = (cluster: L.MarkerCluster) => {
@@ -153,9 +153,6 @@ const HazardsView = ({ hazards = [], selectedHazardId = null, eventTitle, onHaza
                 key={hazard.id}
                 position={[hazard.latitude!, hazard.longitude!]}
                 icon={getMarkerIcon(isSelected)}
-                eventHandlers={{
-                  click: () => onHazardSelect?.(hazard.id),
-                }}
               >
                 <Popup>
                   {renderPopupContent(hazard)}
