@@ -2,6 +2,7 @@ import { AppShell } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { useState } from 'react'
 import MapView from './components/MapView'
+import MapViewRoad from './components/MapViewRoad'
 import HazardsView from './components/HazardsView'
 import Header from './components/Header'
 import Sidebar from './components/Sidebar.tsx'
@@ -10,37 +11,46 @@ import SidebarRoad from './components/SidebarRoad.tsx'
 import SidebarWeather from './components/SidebarWeather.tsx'
 import { eventTypes } from './data/eventTypes'
 import powerOutagesData from './data/powerOutages.json'
+import roadClosuresData from './data/roadClosures.json'
 import weatherEventsData from './data/historicWeatherHazards.json'
 import type { Outage } from './types/outage'
+import type { RoadClosure } from './types/road'
 import type { WeatherEvent, Hazard } from './types/weather'
 
 function App() {
   const [opened, { toggle }] = useDisclosure()
   const [selectedEventType, setSelectedEventType] = useState<string | null>(null)
   const [selectedOutageId, setSelectedOutageId] = useState<string | null>(null)
+  const [selectedRoadId, setSelectedRoadId] = useState<string | null>(null)
   const [selectedWeatherEventId, setSelectedWeatherEventId] = useState<number | null>(null)
   const [selectedHazardId, setSelectedHazardId] = useState<number | null>(null)
   const [showAllWeatherHazards, setShowAllWeatherHazards] = useState<boolean>(true)
 
-  const handleSelectEventType = (eventTypeId: string) => {
-    setSelectedEventType(eventTypeId)
-    setSelectedOutageId(null)
-    setSelectedWeatherEventId(null)
-    setSelectedHazardId(null)
-    setShowAllWeatherHazards(true)
-  }
+    const handleSelectEventType = (eventTypeId: string) => {
+      setSelectedEventType(eventTypeId)
+      setSelectedOutageId(null)
+      setSelectedRoadId(null)
+      setSelectedWeatherEventId(null)
+      setSelectedHazardId(null)
+      setShowAllWeatherHazards(true)
+    }
 
-  const handleBack = () => {
-    setSelectedEventType(null)
-    setSelectedOutageId(null)
-    setSelectedWeatherEventId(null)
-    setSelectedHazardId(null)
-    setShowAllWeatherHazards(true)
-  }
+    const handleBack = () => {
+      setSelectedEventType(null)
+      setSelectedOutageId(null)
+      setSelectedRoadId(null)
+      setSelectedWeatherEventId(null)
+      setSelectedHazardId(null)
+      setShowAllWeatherHazards(true)
+    }
 
-  const handleOutageSelect = (outageId: string) => {
-    setSelectedOutageId(outageId)
-  }
+    const handleOutageSelect = (outageId: string) => {
+      setSelectedOutageId(outageId)
+    }
+
+    const handleRoadSelect = (roadId: string) => {
+      setSelectedRoadId(roadId)
+    }
 
   const handleWeatherEventSelect = (eventId: number) => {
     setSelectedWeatherEventId(eventId)
@@ -59,12 +69,19 @@ function App() {
     return eventType?.name || ''
   }
 
-  const getEventData = (): Outage[] => {
-    if (selectedEventType === 'power-outages') {
-      return powerOutagesData as Outage[]
+    const getEventData = (): Outage[] => {
+      if (selectedEventType === 'power-outages') {
+        return powerOutagesData as Outage[]
+      }
+      return []
     }
-    return []
-  }
+
+    const getRoadClosuresData = (): RoadClosure[] => {
+      if (selectedEventType === 'road-closures') {
+        return roadClosuresData as RoadClosure[]
+      }
+      return []
+    }
 
   const getWeatherHazardsData = (): Hazard[] => {
     const events = weatherEventsData as WeatherEvent[]
@@ -109,13 +126,15 @@ function App() {
             selectedOutageId={selectedOutageId}
           />
         )
-      case 'road-closures':
-        return (
-          <SidebarRoad
-            eventTypeName={getEventTypeName(selectedEventType)}
-            onBack={handleBack}
-          />
-        )
+            case 'road-closures':
+              return (
+                <SidebarRoad
+                  eventTypeName={getEventTypeName(selectedEventType)}
+                  onBack={handleBack}
+                  onRoadSelect={handleRoadSelect}
+                  selectedRoadId={selectedRoadId}
+                />
+              )
       case 'historic-weather-hazards':
         return (
           <SidebarWeather
@@ -131,20 +150,29 @@ function App() {
     }
   }
 
-  const renderMapView = () => {
-    if (selectedEventType === 'historic-weather-hazards') {
-      return (
-        <HazardsView 
-          hazards={getWeatherHazardsData()} 
-          selectedHazardId={selectedHazardId}
-          eventTitle={getSelectedEventTitle()}
-          onHazardSelect={setSelectedHazardId}
-        />
-      )
-    }
+    const renderMapView = () => {
+      if (selectedEventType === 'historic-weather-hazards') {
+        return (
+          <HazardsView 
+            hazards={getWeatherHazardsData()} 
+            selectedHazardId={selectedHazardId}
+            eventTitle={getSelectedEventTitle()}
+            onHazardSelect={setSelectedHazardId}
+          />
+        )
+      }
+
+      if (selectedEventType === 'road-closures') {
+        return (
+          <MapViewRoad 
+            roadClosures={getRoadClosuresData()} 
+            selectedRoadId={selectedRoadId}
+          />
+        )
+      }
     
-    return <MapView outages={getEventData()} selectedOutageId={selectedOutageId} />
-  }
+      return <MapView outages={getEventData()} selectedOutageId={selectedOutageId} />
+    }
 
   return (
     <AppShell
