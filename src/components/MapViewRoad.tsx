@@ -164,7 +164,7 @@ const MapViewRoad = ({ roadClosures = [], selectedRoadId = null }: MapViewRoadPr
         <strong>Time:</strong> {formatTimeRange(closure.start_time, closure.end_time)}
       </p>
       <p style={{ margin: '4px 0', fontSize: '12px' }}>
-        <strong>Type:</strong> {closure.schedule_type === 'planned' ? 'Planned' : 'Unplanned'}
+        <strong>Schedule Type:</strong> {closure.schedule_type === 'planned' ? 'Planned' : 'Unplanned'}
       </p>
       {closure.description && (
         <p style={{ margin: '4px 0', fontSize: '12px' }}>
