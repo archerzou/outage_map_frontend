@@ -253,11 +253,7 @@ const MapViewRoad = ({ roadClosures = [], selectedRoadId = null }: MapViewRoadPr
                               weight: isSelected ? 6 : 4,
                               opacity: isSelected ? 1 : 0.8,
                             }}
-                          >
-                            <Popup>
-                              {renderPopupContent(closure)}
-                            </Popup>
-                          </Polyline>
+                          />
                         )
                       })}
                       <Marker
