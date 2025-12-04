@@ -86,9 +86,6 @@ const SidebarOutages = ({ eventTypeName, onBack, onOutageSelect, selectedOutageI
             data={[
               { value: 'all', label: 'All Statuses' },
               { value: 'active', label: 'Active' },
-              { value: 'restored', label: 'Restored' },
-              { value: 'cancelled', label: 'Cancelled' },
-              { value: 'postponed', label: 'Postponed' },
               { value: 'scheduled', label: 'Scheduled' },
             ]}
             value={statusFilter}
