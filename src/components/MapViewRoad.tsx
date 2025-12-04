@@ -70,20 +70,59 @@ const MapViewRoad = ({ roadClosures = [], selectedRoadId = null }: MapViewRoadPr
     })
   }
 
-  const getRoadClosureCenter = (closure: RoadClosure): [number, number] => {
-    if (closure.location_geometry.type === 'Point') {
-      const coords = closure.location_geometry.coordinates as [number, number]
-      return [coords[1], coords[0]]
-    } else {
-      const multiLineCoords = closure.location_geometry.coordinates as [number, number][][]
+    const getMultiLineStringMidpoint = (multiLineCoords: [number, number][][]): [number, number] => {
       const allPoints = multiLineCoords.flat()
-      const lats = allPoints.map(coord => coord[1])
-      const lngs = allPoints.map(coord => coord[0])
-      const centerLat = (Math.min(...lats) + Math.max(...lats)) / 2
-      const centerLng = (Math.min(...lngs) + Math.max(...lngs)) / 2
-      return [centerLat, centerLng]
+    
+      if (allPoints.length === 0) {
+        return [0, 0]
+      }
+    
+      if (allPoints.length === 1) {
+        return [allPoints[0][1], allPoints[0][0]]
+      }
+    
+      let totalLength = 0
+      const segmentLengths: number[] = []
+    
+      for (let i = 0; i < allPoints.length - 1; i++) {
+        const [lng1, lat1] = allPoints[i]
+        const [lng2, lat2] = allPoints[i + 1]
+        const segmentLength = Math.sqrt(
+          Math.pow(lat2 - lat1, 2) + Math.pow(lng2 - lng1, 2)
+        )
+        segmentLengths.push(segmentLength)
+        totalLength += segmentLength
+      }
+    
+      const halfLength = totalLength / 2
+      let accumulatedLength = 0
+    
+      for (let i = 0; i < segmentLengths.length; i++) {
+        if (accumulatedLength + segmentLengths[i] >= halfLength) {
+          const remainingLength = halfLength - accumulatedLength
+          const ratio = remainingLength / segmentLengths[i]
+          const [lng1, lat1] = allPoints[i]
+          const [lng2, lat2] = allPoints[i + 1]
+          const midLat = lat1 + (lat2 - lat1) * ratio
+          const midLng = lng1 + (lng2 - lng1) * ratio
+          return [midLat, midLng]
+        }
+        accumulatedLength += segmentLengths[i]
+      }
+    
+      const lastPoint = allPoints[allPoints.length - 1]
+      return [lastPoint[1], lastPoint[0]]
     }
-  }
+
+    const getRoadClosureCenter = (closure: RoadClosure): [number, number] => {
+      if (closure.location_geometry.type === 'Point') {
+        const coords = closure.location_geometry.coordinates as [number, number]
+        return [coords[1], coords[0]]
+      } else {
+        const multiLineCoords = closure.location_geometry.coordinates as [number, number][][]
+        return getMultiLineStringMidpoint(multiLineCoords)
+      }
+    }
 
   const getImpactColor = (impact: string): string => {
     switch (impact.toLowerCase()) {
@@ -194,31 +233,45 @@ const MapViewRoad = ({ roadClosures = [], selectedRoadId = null }: MapViewRoadPr
           })}
         </MarkerClusterGroup>
 
-        {lineClosures.map((closure) => {
-          const isSelected = closure.id === selectedRoadId
-          const multiLineCoords = closure.location_geometry.coordinates as [number, number][][]
-          const lineColor = isSelected ? '#00bcd4' : getImpactColor(closure.impact)
+                {lineClosures.map((closure) => {
+                  const isSelected = closure.id === selectedRoadId
+                  const multiLineCoords = closure.location_geometry.coordinates as [number, number][][]
+                  const lineColor = isSelected ? '#00bcd4' : getImpactColor(closure.impact)
+                  const midpoint = getMultiLineStringMidpoint(multiLineCoords)
           
-          return multiLineCoords.map((lineCoords, lineIndex) => {
-            const positions = lineCoords.map(coord => [coord[1], coord[0]] as [number, number])
-            
-            return (
-              <Polyline
-                key={`${closure.id}-line-${lineIndex}`}
-                positions={positions}
-                pathOptions={{
-                  color: lineColor,
-                  weight: isSelected ? 6 : 4,
-                  opacity: isSelected ? 1 : 0.8,
-                }}
-              >
-                <Popup>
-                  {renderPopupContent(closure)}
-                </Popup>
-              </Polyline>
-            )
-          })
-        })}
+                  return (
+                    <span key={closure.id}>
+                      {multiLineCoords.map((lineCoords, lineIndex) => {
+                        const positions = lineCoords.map(coord => [coord[1], coord[0]] as [number, number])
+                
+                        return (
+                          <Polyline
+                            key={`${closure.id}-line-${lineIndex}`}
+                            positions={positions}
+                            pathOptions={{
+                              color: lineColor,
+                              weight: isSelected ? 6 : 4,
+                              opacity: isSelected ? 1 : 0.8,
+                            }}
+                          >
+                            <Popup>
+                              {renderPopupContent(closure)}
+                            </Popup>
+                          </Polyline>
+                        )
+                      })}
+                      <Marker
+                        key={`${closure.id}-marker`}
+                        position={midpoint}
+                        icon={getMarkerIcon(isSelected)}
+                      >
+                        <Popup>
+                          {renderPopupContent(closure)}
+                        </Popup>
+                      </Marker>
+                    </span>
+                  )
+                })}
       </MapContainer>
     </Box>
   )
