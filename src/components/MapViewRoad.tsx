@@ -231,43 +231,50 @@ const MapViewRoad = ({ roadClosures = [], selectedRoadId = null }: MapViewRoadPr
               </Marker>
             )
           })}
+          {lineClosures.map((closure) => {
+            const isSelected = closure.id === selectedRoadId
+            const multiLineCoords = closure.location_geometry.coordinates as [number, number][][]
+            const midpoint = getMultiLineStringMidpoint(multiLineCoords)
+            
+            return (
+              <Marker
+                key={`${closure.id}-marker`}
+                position={midpoint}
+                icon={getMarkerIcon(isSelected)}
+              >
+                <Popup>
+                  {renderPopupContent(closure)}
+                </Popup>
+              </Marker>
+            )
+          })}
         </MarkerClusterGroup>
 
-                {lineClosures.map((closure) => {
-                  const isSelected = closure.id === selectedRoadId
-                  const multiLineCoords = closure.location_geometry.coordinates as [number, number][][]
-                  const lineColor = isSelected ? '#00bcd4' : getImpactColor(closure.impact)
-                  const midpoint = getMultiLineStringMidpoint(multiLineCoords)
+        {lineClosures.map((closure) => {
+          const isSelected = closure.id === selectedRoadId
+          const multiLineCoords = closure.location_geometry.coordinates as [number, number][][]
+          const lineColor = isSelected ? '#00bcd4' : getImpactColor(closure.impact)
           
-                  return (
-                    <span key={closure.id}>
-                      {multiLineCoords.map((lineCoords, lineIndex) => {
-                        const positions = lineCoords.map(coord => [coord[1], coord[0]] as [number, number])
+          return (
+            <span key={`${closure.id}-lines`}>
+              {multiLineCoords.map((lineCoords, lineIndex) => {
+                const positions = lineCoords.map(coord => [coord[1], coord[0]] as [number, number])
                 
-                        return (
-                          <Polyline
-                            key={`${closure.id}-line-${lineIndex}`}
-                            positions={positions}
-                            pathOptions={{
-                              color: lineColor,
-                              weight: isSelected ? 6 : 4,
-                              opacity: isSelected ? 1 : 0.8,
-                            }}
-                          />
-                        )
-                      })}
-                      <Marker
-                        key={`${closure.id}-marker`}
-                        position={midpoint}
-                        icon={getMarkerIcon(isSelected)}
-                      >
-                        <Popup>
-                          {renderPopupContent(closure)}
-                        </Popup>
-                      </Marker>
-                    </span>
-                  )
-                })}
+                return (
+                  <Polyline
+                    key={`${closure.id}-line-${lineIndex}`}
+                    positions={positions}
+                    pathOptions={{
+                      color: lineColor,
+                      weight: isSelected ? 6 : 4,
+                      opacity: isSelected ? 1 : 0.8,
+                    }}
+                  />
+                )
+              })}
+            </span>
+          )
+        })}
       </MapContainer>
     </Box>
   )
